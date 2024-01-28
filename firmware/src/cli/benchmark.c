@@ -24,6 +24,8 @@
  * @file benchmark.c bench command
  */
 
+#ifdef BENCHMARK
+
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -151,4 +153,4 @@ void cli_bench(int argc, char* argv[])
         uart_flush();
     }
 }
-// #endif
+#endif

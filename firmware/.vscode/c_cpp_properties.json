@@ -23,21 +23,21 @@
             "defines": [
                 "F_CPU=20000000L",
                 "PLATFORMIO=60113",
-                "ARDUINO_AVR_ATmega1284",
-                "BOARD_REV=6",
+                "ARDUINO_AVR_AVR128DB28",
+                "ARDUINO_avrdb",
+                "BOARD_REV=10",
                 "BANK_PORT=0X78",
                 "TMS_BASE=0xBE",
                 "SN76489_PORT=0xFF",
                 "DS1302_RTC=1",
                 "MSX_KEY_BASE=0xA9",
-                "__AVR_ATmega1284P__",
                 ""
             ],
             "cStandard": "gnu11",
             "cppStandard": "gnu++11",
             "compilerPath": "C:/Users/jblan/.platformio/packages/toolchain-atmelavr/bin/avr-gcc.exe",
             "compilerArgs": [
-                "-mmcu=atmega1284p",
+                "-mmcu=avr128db28",
                 ""
             ]
         }

@@ -78,21 +78,20 @@
 
 #define BUSRQ (1 << 0)
 
-#define GET_BUSRQ (PINB & BUSRQ)
+#define GET_BUSRQ (PORTA.IN & BUSRQ)
 #define BUSRQ_STATUS (status.flags & BUSRQ)
-#define BUSRQ_HI PORTB |= BUSRQ
-#define BUSRQ_LO PORTB &= ~BUSRQ
+#define BUSRQ_HI PORTA.OUT |= BUSRQ
+#define BUSRQ_LO PORTA.OUT &= ~BUSRQ
 
 #define CTRLA_MASK 0x0F
-#define CTRLA_OUTPUT_INIT DDRB |= BUSRQ
 
 #define WAIT (1 << 1)
 #define IOXINT (1 << 2)
 
-#define GET_WAIT (PINB & WAIT)
+#define GET_WAIT (PORTA.IN & WAIT)
 #define WAIT_STATUS (status.flags & WAIT)
 
-#define GET_IOXINT (PINB & IOXINT)
+#define GET_IOXINT (PORTA.IN & IOXINT)
 #define IOXINT_STATUS (status.flags & IOXINT)
 
 /**
@@ -104,31 +103,36 @@
 #define CLK (1 << 6)
 #define BUSACK (1 << 7)
 
-#define GET_RD (PIND & RD)
+#define GET_RD (PORTD.IN & RD)
 #define RD_STATUS (status.flags & RD)
-#define RD_HI PORTD |= RD
-#define RD_LO PORTD &= ~RD
+#define RD_HI PORTD.OUT |= RD
+#define RD_LO PORTD.OUT &= ~RD
 
-#define GET_WR (PIND & WR)
+#define GET_WR (PORTD.IN & WR)
 #define WR_STATUS (status.flags & WR)
-#define WR_HI PORTD |= WR
-#define WR_LO PORTD &= ~WR
+#define WR_HI PORTD.OUT |= WR
+#define WR_LO PORTD.OUT &= ~WR
 
-#define RDWR_INPUT DDRD &= ~(RD | WR)
-#define RDWR_OUTPUT DDRD |= (RD | WR)
-#define RDWR_HI PORTD |= (RD | WR)
+#define RDWR_INPUT PORTD.DIR &= ~(RD | WR)
+#define RDWR_OUTPUT PORTD.DIR |= (RD | WR)
+#define RDWR_HI PORTD.OUT |= (RD | WR)
 
-#define GET_CLK (PIND & CLK)
+#define GET_CLK (PORTD.IN & CLK)
 #define CLK_STATUS (status.flags & CLK)
-#define CLK_HI PORTD |= CLK
-#define CLK_LO PORTD &= ~CLK
-#define CLK_TOGGLE PIND |= CLK
+#define CLK_HI PORTD.OUT |= CLK
+#define CLK_LO PORTD.OUT &= ~CLK
+#define CLK_TOGGLE PORTD.IN |= CLK
 
-#define GET_BUSACK (PIND & BUSACK)
+#define GET_BUSACK (PORTD.IN & BUSACK)
 #define BUSACK_STATUS (status.flags & BUSACK)
 
 #define CTRLD_MASK 0xF0
-#define CTRLD_OUTPUT_INIT DDRD |= CLK
+
+#define CTRL_INIT \
+    PORTA.DIR |= BUSRQ \
+    PORTD.DIR |= CLK
+
+#define GET_CTRL ((PORTA.IN & CTRLA_MASK) | (PORTD.IN & CTRLD_MASK))
 
 #define CTRLX_IODIR IODIRA
 #define CTRLX_GPPU GPPUA
@@ -146,7 +150,7 @@
 #define MREQ (1 << 6)
 #define MWAIT (1 << 7)
 
-#define CTRLX_OUTPUT_INIT iox0_clear(CTRLX_IODIR, MWAIT)
+#define CTRLX_INIT iox0_clear(CTRLX_IODIR, MWAIT)
 
 #define GET_MWAIT (iox0_read(CTRLX_GPIO) & MWAIT)
 #define MWAIT_STATUS (status.xflags & MWAIT)
@@ -192,7 +196,9 @@
 #define NMI_OUTPUT iox0_clear(CTRLX_IODIR, NMI)
 #define NMI_INPUT iox0_set(CTRLX_IODIR, NMI)
 
-#define IOX_CS_PORT PORTD
+#define GET_CTRLX iox0_read(CTRLX_GPIO)
+
+#define IOX_CS_PORT PORTD.OUT
 #define IOX_CS_PIN PIN7_bm
 #define SD_CS_PORT PORTA
 #define SD_CS_PIN PIN7_bm

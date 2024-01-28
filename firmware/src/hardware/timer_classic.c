@@ -24,6 +24,7 @@
  * @file timer.c AVR timer functions
  */
 
+#ifdef __AVR_ATmega1284P__
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <stdint.h>
@@ -95,3 +96,20 @@ void set_tcnt(uint8_t timer, uint16_t value)
         TCNT3 = value;
     SREG = sreg;
 }
+
+void set_pwm(uint8_t clkdiv)
+{
+    if (clkdiv == 0) {
+        TCCR2A = 0;
+        TCCR2B = 0;
+        OCR2A = 0;
+        OCR2B = 0;
+    } else {
+        // Fast PWM mode with adjustable top and no prescaler
+        TCCR2A |= (1 << COM2B1) | (1 << WGM21) | (1 << WGM20);
+        TCCR2B |= (1 << WGM22) | (1 << CS20);
+        OCR2A = (clkdiv - 1);
+        OCR2B = (clkdiv - 1) >> 1;
+    }
+}
+#endif

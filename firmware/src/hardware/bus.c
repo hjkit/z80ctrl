@@ -34,6 +34,7 @@
 
 #include "hardware/bus.h"
 #include "hardware/mcp23s17.h"
+#include "hardware/timer.h"
 
 /**
  * Run the clock for a specified number of cycles
@@ -70,11 +71,7 @@ uint8_t get_clkdiv(void)
  */
 void clk_run(void)
 {
-    // Fast PWM mode with adjustable top and no prescaler
-    TCCR2A |= (1 << COM2B1) | (1 << WGM21) | (1 << WGM20);
-    TCCR2B |= (1 << WGM22) | (1 << CS20);
-    OCR2A = (clkdiv - 1);
-    OCR2B = (clkdiv - 1) >> 1;
+    set_pwm(clkdiv);
 }
 
 /**
@@ -82,10 +79,7 @@ void clk_run(void)
  */
 void clk_stop()
 {
-    TCCR2A = 0;
-    TCCR2B = 0;
-    OCR2A = 0;
-    OCR2B = 0;
+    set_pwm(0);
 }
 
 /**
@@ -144,11 +138,10 @@ uint8_t bus_release(void)
 bus_stat bus_status(void)
 {
     bus_stat status;
-    uint16_t iox = iox0_read16(ADDRHI_GPIO);
-    status.flags = (PINB & CTRLB_MASK) | (PIND & CTRLD_MASK);
-    status.xflags = iox >> 8;
-    status.data = DATA_PIN;
-    status.addr = ADDRLO_PIN | ((iox & 0xFF) << 8);
+    status.flags = GET_CTRL;
+    status.xflags = GET_CTRLX;
+    status.data = GET_DATA;
+    status.addr = GET_ADDR;
     return status;
 }
 
@@ -158,7 +151,7 @@ bus_stat bus_status(void)
 bus_stat bus_status_fast(void)
 {
     bus_stat status;
-    status.flags = (PINB & CTRLB_MASK) | (PIND & CTRLD_MASK);
+    status.flags = GET_CTRL;
     status.xflags = 0xFF;
     status.data = GET_DATA;
     status.addr = GET_ADDRLO;
@@ -199,10 +192,8 @@ void bus_init(void)
     iox_init();
 
     // Initialize control signals
-    CTRLB_OUTPUT_INIT;
-    CTRLD_OUTPUT_INIT;
-    CTRLX_OUTPUT_INIT;
-    CTRLX_PULLUP_INIT;
+    CTRL_INIT;
+    CTRLX_INIT;
 
     // Reset the processor
     BUSRQ_HI;

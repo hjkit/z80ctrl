@@ -24,7 +24,9 @@
  * @file bus.h Low-level control of the Z80 bus
  */
 
-#pragma once#include <avr/io.h>
+#ifndef HARDWARE_GPIO_1284P
+#define HARDWARE_GPIO_1284P
+#include <avr/io.h>
 
 #include "mcp23s17.h"
 
@@ -85,7 +87,6 @@
 #define BUSRQ_LO PORTB &= ~BUSRQ
 
 #define CTRLB_MASK 0x0F
-#define CTRLB_OUTPUT_INIT DDRB |= BUSRQ
 
 #if (BOARD_REV == 3 || BOARD_REV == 4)
 #define IORQ (1 << 1)
@@ -154,7 +155,12 @@
 #define BUSACK_STATUS (status.flags & BUSACK)
 
 #define CTRLD_MASK 0xF0
-#define CTRLD_OUTPUT_INIT DDRD |= CLK
+
+#define CTRL_INIT \
+    DDRB |= BUSRQ; \
+    DDRD |= CLK;
+
+#define GET_CTRL ((PINB & CTRLB_MASK) | (PIND & CTRLD_MASK))
 
 /**
  * IOX flags
@@ -246,6 +252,12 @@
 
 #define CTRLX_PULLUP_INIT iox0_set(CTRLX_GPPU, (HALT | RESET | INTERRUPT | NMI))
 
+#define CTRLX_INIT \
+    CTRLX_OUTPUT_INIT; \
+    CTRLX_PULLUP_INIT;
+
+#define GET_CTRLX iox0_read(CTRLX_GPIO)
+
 // SPI chip select pins
 #define CS_PORT B
 #define CSADDR_POS 3
@@ -255,3 +267,4 @@
 #define SD_CS PORT ## CS_PORT = (PORT ## CS_PORT & ~CSADDR_MASK | (SD_ADDR << CSADDR_POS))
 #define RTC_CS PORT ## CS_PORT = (PORT ## CS_PORT & ~CSADDR_MASK | (RTC_ADDR << CSADDR_POS))
 #define IDLE_CS PORT ## CS_PORT = (PORT ## CS_PORT & ~CSADDR_MASK | (IDLE_ADDR << CSADDR_POS))
+#endif
